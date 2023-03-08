@@ -1,0 +1,18 @@
+---
+title: 'LENS Workshop Tutorial: Fusing NEON LiDAR and Organismal Data'
+author: "Sydne Record & Isaac Shepard"
+date: "2023-03-02"
+output: html_document
+---
+
+This tutorial focuses on integrating multiple National Ecological Observatory Network (NEON) data sources to examine how edge effects might influence biodiversity patterns in the Great Smoky Mountains National Park (GRSM) NEON site.
+
+## Learning Objectives
+1. Participants will learn how to visualize spatial data representing features of NEON sites (i.e., elevation rasters, lines representing roads, and points indicating organismal plot locations) in R.
+2. Participants will learn about NEON organismal data for sentinel taxa and how to access those data in the ecocomDP format in R using the NEONdivdata package.
+3. Participants will formulate hypotheses about how edge effects may influence biodiversity at NEON sites and explore these hypotheses with analyses on the relationships between distance from road and species richness of various sentinel taxa.
+
+# Context 
+Fragmentation is the disruption of continuity in pattern or process. Across the globe, human activity has resulted in habitat fragmentation to varying degrees. For instance, the creation of roads for transportation creates a mosaic of fragmented patches of habitat. Environmental conditions differ closer to the edge of a road relative to areas further from a road where there is intact habitat within a patch. This phenomenon of differing conditions at the transition zone between the road and intact habitat away from the road is known more generally as an edge effect. In this tutorial, we will explore how edge effects caused by roads within a NEON site influence species richness of NEON's sentinel taxa.
+
+[NEON](https://www.neonscience.org/) is comprised of 81 terrestrial and aquatic sites spanning the contiguous United States, Puerto Rico, Alaska, and Hawaii distributed across twenty eco-climatic domains. Today we will focus on the Great Smoky Mountain National Park (GRSM) site. 
