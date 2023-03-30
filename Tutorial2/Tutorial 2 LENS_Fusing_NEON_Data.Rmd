@@ -2,7 +2,9 @@
 title: 'LENS Workshop Tutorial: Fusing NEON LiDAR and Organismal Data'
 author: "Sydne Record & Isaac Shepard"
 date: "2023-03-02"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 This tutorial focuses on integrating multiple National Ecological Observatory Network (NEON) data sources to examine how edge effects might influence biodiversity patterns in the Great Smoky Mountains National Park (GRSM) NEON site.
@@ -17,11 +19,13 @@ Fragmentation is the disruption of continuity in pattern or process. Across the 
 
 [NEON](https://www.neonscience.org/) is comprised of 81 terrestrial and aquatic sites spanning the contiguous United States, Puerto Rico, Alaska, and Hawaii distributed across twenty eco-climatic domains. NEON uses standardized protocols to collect a variety of observations at each site ranging from information on the flux of greenhouse gases in the atmosphere above sites to the number of small mammals scurrying around on the ground. Although NEON collects a great deal of information at each site, very little information on human land use and management is collected by the Observatory. However, remote sensing data collected by the NEON Airborne Observation Platform (AOP), a low-flying plane equipped with various sensors and cameras, have the potential to provide some information on land use at the sites (Ordway et al. 2021). For instance, the NEON AOP collects remotely sensed information using a **Li**ght **D**etection **A**nd **R**anging (LiDAR or active scanning) sensor that can be used to reconstruct a high-resolution (1-m) topographic map of the each site. Such LiDAR derived data have been used by archaeologists to detect artefacts across landscape scales (Johnson & Oiumet 2014).
 
-Recent work by the Record research group at Bryn Mawr College and the University of Maine generated spatial data layers (shapefiles) of roads across all NEON sites leveraging the NEON AOP LiDAR data. During this process, roads and stream data layers provided by the United States Census and National Hydrological Databases, respectively, were overlaid onto a high-resolution (i.e., 1-m) digital elevation model generated from the NEON LiDAR data and then shapefiles of undetected roads (e.g., dirt roads) were made (Figure 1).
+Recent work by the Record research group at Bryn Mawr College and the University of Maine generated spatial data layers (shapefiles) of roads across all NEON sites leveraging the NEON AOP LiDAR data. During this process, roads and stream data layers provided by the United States Census and National Hydrological Databases, respectively, were overlaid onto a high-resolution (i.e., 1-m) digital elevation model hillshade map generated from the NEON LiDAR data and then shapefiles of undetected roads (e.g., dirt roads) were made (Figure 1).
 
-![Caption for the picture.](/path/to/image.png)
+![Close up of NEON LiDAR derived digital elevation map showing unmarked road, US Census road in pink, and National Hydrography Database stream in blue.](C:/Users/sydne.record/Documents/GitHub/April2023_Meeting_ORNL/Tutorial2/Figures/Fig1-Lidar.jpg)
 
-Today we will focus on the Great Smoky Mountain National Park (GRSM) site. 
+Today we will explore how to incorporate this information on roads at NEON sites into an analysis investigating relationships between NEON organismal observations and edge effects focused on the Great Smoky Mountain National Park (GRSM) site. Let's first load in the GRSM LiDAR derived hillshade map and overlay the roads spatial layer onto it.
+
+
 
 ## Literature Cited
 Johnson, K.M. and W.B. Ouimet. 2014. Rediscovering the lost archaeological landscape of southern New England using airborne light detection and ranging (LiDAR). *Journal of Archaeological Science*, 42:9-20.
