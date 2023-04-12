@@ -3,18 +3,18 @@ title: 'LENS Workshop Tutorial: Fusing NEON LiDAR and Organismal Data'
 author: "Sydne Record & Isaac Shepard"
 date: "2023-03-02"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 This tutorial focuses on integrating multiple National Ecological Observatory Network (NEON) data sources to examine how edge effects might influence biodiversity patterns in the Great Smoky Mountains National Park (GRSM) NEON site.
 
 ## Learning Objectives
-1. Participants will learn how to visualize spatial data representing features of NEON sites (i.e., elevation rasters, lines representing roads, and points indicating organismal plot locations) in R.
+1. Participants will learn how to visualize spatial data representing features of NEON sites (i.e., lines representing roads and points indicating organismal plot locations) in R.
 2. Participants will learn about NEON organismal data for sentinel taxa and how to access those data in the ecocomDP format in R using the NEONdivdata package.
 3. Participants will formulate hypotheses about how edge effects may influence biodiversity at NEON sites and explore these hypotheses with analyses on the relationships between distance from road and species richness of various sentinel taxa.
 
-# Context 
+## Context 
 Fragmentation is the disruption of continuity in pattern or process. Across the globe, human activity has resulted in habitat fragmentation to varying degrees. For instance, the creation of roads for transportation creates a mosaic of fragmented patches of habitat. Environmental conditions differ closer to the edge of a road relative to areas further from a road where there is intact habitat within a patch. This phenomenon of differing conditions at the transition zone between the road and intact habitat away from the road is known more generally as an edge effect. In this tutorial, we will explore how edge effects caused by roads within a NEON site influence species richness of NEON's sentinel taxa.
 
 [NEON](https://www.neonscience.org/) is comprised of 81 terrestrial and aquatic sites spanning the contiguous United States, Puerto Rico, Alaska, and Hawaii distributed across twenty eco-climatic domains. NEON uses standardized protocols to collect a variety of observations at each site ranging from information on the flux of greenhouse gases in the atmosphere above sites to the number of small mammals scurrying around on the ground. Although NEON collects a great deal of information at each site, very little information on human land use and management is collected by the Observatory. However, remote sensing data collected by the NEON Airborne Observation Platform (AOP), a low-flying plane equipped with various sensors and cameras, have the potential to provide some information on land use at the sites (Ordway et al. 2021). For instance, the NEON AOP collects remotely sensed information using a **Li**ght **D**etection **A**nd **R**anging (LiDAR or active scanning) sensor that can be used to reconstruct a high-resolution (1-m) topographic map of the each site. Such LiDAR derived data have been used by archaeologists to detect artefacts across landscape scales (Johnson & Oiumet 2014).
@@ -23,7 +23,59 @@ Recent work by the Record research group at Bryn Mawr College and the University
 
 ![Close up of NEON LiDAR derived digital elevation map showing unmarked road, US Census road in pink, and National Hydrography Database stream in blue.](C:/Users/sydne.record/Documents/GitHub/April2023_Meeting_ORNL/Tutorial2/Figures/Fig1-Lidar.jpg)
 
-Today we will explore how to incorporate this information on roads at NEON sites into an analysis investigating relationships between NEON organismal observations and edge effects focused on the Great Smoky Mountain National Park (GRSM) site. Let's first load in the GRSM LiDAR derived road layer and the NEON terrestrial sampling boundaries.
+Today we will explore how to incorporate this information on roads at NEON sites into an analysis investigating relationships between NEON organismal observations and edge effects focused on the Great Smoky Mountain National Park (GRSM) site. 
+
+## Mapping roads and NEON Terrestrial Observation Sampling (TOS) plots 
+Let's first load in the GRSM LiDAR derived road layer and the NEON TOS boundaries.
+
+To begin, we need to point R to the location where we will be reading in data from. Generally, it is good practice to set a directory from with you will be importing data and another directory to which you will be exporting any outputs. If you have not used the *file.path* function before type "? file.path" into your console to read the help file about it. You can do this for any of the funtions we are using today.
+```{r, eval=FALSE}
+# Set root folder that is our shared MSB Google Drive
+root_folder <- 'G:/Shared drives/MacrosystemsBiodiversity'
+# Set your working directory to the root folder
+setwd(file.path(root_folder))
+# Define a file path for exporting from this script. 
+export_path <- file.path(root_folder, 'manuscripts/NEON_TIEE/ROoutputs')
+# Import data path set to landuse data
+landusedata_path <- file.path(root_folder, 'data/landuse')
+# Import data path for site shapefile
+NEONspatialdata_path <- file.path(root_folder, 'data/neon_spatial/L0')
+```
+
+You will also want to load the following R packages that will provide some additional functions for us to use today that are not included in the base configuration of R. The terra package has a great tutorial [here](https://rspatial.org/spatial/). The book [*R for Data Science*](https://r4ds.had.co.nz/) by Grolemund and Wickham is an excellent introduction to the tidyverse, which is the group of packages we will be using today to wrangle and visualize data.
+```{r, eval=FALSE}
+# Load relevant R packages
+library(terra)
+library(rgeos)
+library(tidyverse)
+```
+
+Read in the LiDAR-derived roads layer, NEON network-wide terrestrial sampling boundaries, and NEON network-wide organismal sampling plot boundaries. Note that all of these are shapefiles. 
+```{r, eval=FALSE}
+# Read in NEON site boundaries shapefile as a spatial polygons vector
+NEONsiteshp <- vect(file.path(NEONspatialdata_path,"Field_Sampling_Boundaries_2020/terrestrialSamplingBoundaries.shp"))
+# Read in NEON Terrestrial Observation System plot centroids shapefile as a spatial points vector
+NEONTOSshp <- vect(file.path(NEONspatialdata_path,"All_NEON_TOS_Plots_V9/All_NEON_TOS_Plot_Centroids_V9.shp"))
+# Read in GRSM roads shapefile as a spatial polygons vector. 
+GRSMlinearshp <- vect(file.path(landusedata_path, "L1/linear_features/GRSM/linear_features.shp"))
+```
+
+Create a map of the roads, sampling boundaries and plot centroids to visualize the spatial data. Note that for accessibility, we have intentionally used a colorblind friendly color combination.
+```{r, eval=FALSE}
+plot(GRSMlinearshp)
+plot(NEONsiteshp, add=TRUE, col="#999999")
+plot(NEONTOSshp, add=TRUE, col="#E69F00")
+```
+
+Note here that the roads layer does not completely cover the spatial extent of the entire GRSM site, particularly the northeastern portion of the GRSM site. Keep in mind that the roads layer was derived from the NEON LiDAR data, which has some spatial gaps in it when weather conditions during flights prevent good visibility. For the purposes of this analysis, we will exclude the plots that do not overlap with the road layer by cropping the plot centroids data to match the spatial extent of the road layer.
+
+```{r, eval=FALSE}
+# Crop NEON TOS plot points to LiDAR data. 
+GRSMplotslidar <- crop(NEONTOSshp, GRSMlinearshp)
+# Plot the cropped points overlaid onto the roads layer to make sure that you have accomplished what you intended.
+plot(GRSMlinearshp)
+plot(GRSMplotslidar, add=TRUE, col="#E69F00")
+```
 
 
 
